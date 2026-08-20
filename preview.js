@@ -39,7 +39,6 @@ async function init() {
 
   const record = await getLatestCapture();
   if (!record?.blob) {
-    emptyEl.hidden = false;
     return;
   }
 
@@ -56,6 +55,7 @@ async function init() {
     .filter(Boolean)
     .join('  ·  ');
 
+  emptyEl.hidden = true;
   shotEl.hidden = false;
   dockEl.hidden = false;
 }
@@ -63,6 +63,7 @@ async function init() {
 function showError(title, detail) {
   document.getElementById('error-title').textContent = title;
   document.getElementById('error-detail').textContent = detail;
+  emptyEl.hidden = true;
   errorEl.hidden = false;
 }
 

@@ -81,7 +81,7 @@ async function startCapture(tab) {
       const bitmap = await dataUrlToBitmap(dataUrl);
 
       if (!canvas) {
-        deviceScale = bitmap.width / Math.max(1, metrics.viewportWidth);
+        deviceScale = bitmap.width / Math.max(1, metrics.windowInnerWidth);
         const fitted = fitCanvas(
           Math.round(metrics.pageWidth * deviceScale),
           Math.round(metrics.pageHeight * deviceScale),
@@ -136,6 +136,7 @@ function normalizeMetrics(raw) {
   return {
     title: raw.title,
     url: raw.url,
+    windowInnerWidth: Math.max(1, Math.floor(raw.windowInnerWidth || viewportWidth)),
     viewportWidth,
     viewportHeight,
     pageWidth: Math.max(viewportWidth, Math.ceil(raw.pageWidth || viewportWidth)),

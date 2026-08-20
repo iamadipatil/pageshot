@@ -132,13 +132,15 @@
         captureTop: rect.top,
         scrollX: el.scrollLeft,
         scrollY: el.scrollTop,
-        dpr: window.devicePixelRatio || 1,
-        title: document.title || 'Untitled',
-        url: location.href,
-      };
-    }
+      dpr: window.devicePixelRatio || 1,
+      windowInnerWidth: window.innerWidth,
+      windowInnerHeight: window.innerHeight,
+      title: document.title || 'Untitled',
+      url: location.href,
+    };
+  }
 
-    const doc = windowScrollerElement();
+  const doc = windowScrollerElement();
     const body = document.body;
     const pageWidth = Math.max(
       doc.scrollWidth,
@@ -162,6 +164,8 @@
       scrollX: window.scrollX,
       scrollY: window.scrollY,
       dpr: window.devicePixelRatio || 1,
+      windowInnerWidth: window.innerWidth,
+      windowInnerHeight: window.innerHeight,
       title: document.title || 'Untitled',
       url: location.href,
     };
