@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Original PageShot toolbar icons — page silhouette + capture lens."""
+"""Original Zen Page Shot toolbar icons — page silhouette + capture lens."""
 
 from pathlib import Path
 

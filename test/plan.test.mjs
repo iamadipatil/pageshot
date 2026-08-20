@@ -113,11 +113,13 @@ test('restricted URLs are rejected', () => {
   assert.equal(isRestrictedUrl('https://example.com/article'), false);
 });
 
-test('manifest is valid MV3 PageShot and files exist', () => {
+test('manifest is valid MV3 Zen Page Shot and files exist', () => {
   const manifest = JSON.parse(readFileSync(join(root, 'manifest.json'), 'utf8'));
   assert.equal(manifest.manifest_version, 3);
-  assert.equal(manifest.name, 'PageShot');
+  assert.equal(manifest.name, 'Zen Page Shot');
+  assert.equal(manifest.short_name, 'ZenPageShot');
   assert.ok(!/gofullpage|full page screen capture/i.test(JSON.stringify(manifest)));
+  assert.ok(!/\bPageShot\b/.test(JSON.stringify(manifest)));
   assert.ok(manifest.background.service_worker);
   assert.equal(manifest.background.type, 'module');
   assert.ok(manifest.permissions.includes('activeTab'));
@@ -125,11 +127,24 @@ test('manifest is valid MV3 PageShot and files exist', () => {
   assert.ok(!manifest.permissions.includes('tabs'));
   assert.ok(!manifest.host_permissions);
 
+  const preview = readFileSync(join(root, 'preview.html'), 'utf8');
+  assert.match(preview, /Zen Page Shot/);
+  assert.match(preview, /Download PNG/);
+  assert.match(preview, /download-jpg/);
+  assert.match(preview, /download-pdf/);
+  assert.doesNotMatch(preview, />PageShot</);
+
+  const readme = readFileSync(join(root, 'README.md'), 'utf8');
+  assert.match(readme, /Zen Page Shot/);
+  assert.match(readme, /chrome:\/\/extensions/);
+  assert.match(readme, /PDF/);
+
   for (const file of [
     'background.js',
     'content.js',
     'plan.js',
     'db.js',
+    'export.js',
     'preview.html',
     'preview.css',
     'preview.js',

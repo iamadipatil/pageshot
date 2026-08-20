@@ -32,7 +32,7 @@ async function startCapture(tab) {
 
     await chrome.action.setBadgeBackgroundColor({ tabId, color: '#C45C2A' });
     await chrome.action.setBadgeText({ tabId, text: '…' });
-    await chrome.action.setTitle({ tabId, title: 'PageShot — capturing…' });
+    await chrome.action.setTitle({ tabId, title: 'Zen Page Shot — capturing…' });
 
     await chrome.tabs.update(tabId, { active: true });
     const live = await chrome.tabs.get(tabId);
@@ -125,7 +125,7 @@ async function startCapture(tab) {
     capturing = false;
     if (tabId != null) {
       await chrome.action.setBadgeText({ tabId, text: '' }).catch(() => {});
-      await chrome.action.setTitle({ tabId, title: 'PageShot — capture this page' }).catch(() => {});
+      await chrome.action.setTitle({ tabId, title: 'Zen Page Shot — capture this page' }).catch(() => {});
     }
   }
 }
@@ -197,5 +197,6 @@ async function openPreview(error, detail) {
   if (detail) params.set('detail', detail.slice(0, 240));
   const query = params.toString();
   const url = chrome.runtime.getURL(query ? `preview.html?${query}` : 'preview.html');
-  await chrome.tabs.create({ url });
+  // Full results tab — not a popup, overlay, or in-page preview.
+  await chrome.tabs.create({ url, active: true });
 }

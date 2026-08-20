@@ -1,5 +1,5 @@
 /**
- * PageShot page agent.
+ * Zen Page Shot page agent.
  * Injected into the isolated world. Scrolls, measures, and temporarily
  * tames sticky chrome so a full-page stitch does not repeat headers.
  */

@@ -1,4 +1,5 @@
 import { getLatestCapture } from './db.js';
+import { blobToJpeg, captureToPdf, JPEG_QUALITY } from './export.js';
 
 const params = new URLSearchParams(location.search);
 const errorCode = params.get('error');
@@ -12,13 +13,17 @@ const imageEl = document.getElementById('image');
 const titleEl = document.getElementById('page-title');
 const subEl = document.getElementById('page-sub');
 const copyBtn = document.getElementById('copy');
+const jpgBtn = document.getElementById('download-jpg');
+const pdfBtn = document.getElementById('download-pdf');
 const downloadBtn = document.getElementById('download');
 const toastEl = document.getElementById('toast');
+const actionButtons = [copyBtn, jpgBtn, pdfBtn, downloadBtn];
 
 /** @type {null | { blob: Blob, meta: Record<string, unknown> }} */
 let capture = null;
 /** @type {string | null} */
 let objectUrl = null;
+let busy = false;
 
 init().catch((error) => {
   showError('Something went wrong', error instanceof Error ? error.message : String(error));
@@ -49,7 +54,7 @@ async function init() {
   const title = String(capture.meta.title || 'Untitled page');
   const width = Number(capture.meta.width) || 0;
   const height = Number(capture.meta.height) || 0;
-  document.title = `${title} · PageShot`;
+  document.title = `${title} · Zen Page Shot`;
   titleEl.textContent = title;
   subEl.textContent = [formatHost(capture.meta.url), width && height ? `${width} × ${height}` : '']
     .filter(Boolean)
@@ -69,41 +74,78 @@ function showError(title, detail) {
 
 downloadBtn.addEventListener('click', () => {
   if (!capture) return;
-  const url = objectUrl || URL.createObjectURL(capture.blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filenameFor(capture.meta);
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
+  saveBlob(capture.blob, filenameFor(capture.meta, 'png'));
 });
 
-copyBtn.addEventListener('click', async () => {
-  if (!capture) return;
-  try {
+jpgBtn.addEventListener('click', () => {
+  void withBusy(async () => {
+    toast('Preparing JPG…');
+    const jpeg = await blobToJpeg(capture.blob, JPEG_QUALITY);
+    saveBlob(jpeg, filenameFor(capture.meta, 'jpg'));
+    toast('JPG saved');
+  }, 'Could not make a JPG');
+});
+
+pdfBtn.addEventListener('click', () => {
+  void withBusy(async () => {
+    toast('Preparing PDF…');
+    const pdf = await captureToPdf(capture.blob, {
+      width: Number(capture.meta.width) || undefined,
+      height: Number(capture.meta.height) || undefined,
+    });
+    saveBlob(pdf, filenameFor(capture.meta, 'pdf'));
+    toast('PDF saved');
+  }, 'Could not make a PDF');
+});
+
+copyBtn.addEventListener('click', () => {
+  void withBusy(async () => {
     await navigator.clipboard.write([
       new ClipboardItem({ [capture.blob.type || 'image/png']: capture.blob }),
     ]);
-    toast('Copied to clipboard');
-  } catch {
-    toast('Copy needs a user click in this tab');
-  }
+    toast('Copied PNG to clipboard');
+  }, 'Copy needs a user click in this tab');
 });
 
 document.addEventListener('keydown', (event) => {
   if (event.metaKey || event.ctrlKey || event.altKey) return;
-  if (event.key === 'Enter' || event.key.toLowerCase() === 'd') {
-    downloadBtn.click();
-  } else if (event.key.toLowerCase() === 'c') {
-    copyBtn.click();
-  }
+  const key = event.key.toLowerCase();
+  if (event.key === 'Enter' || key === 'd') downloadBtn.click();
+  else if (key === 'j') jpgBtn.click();
+  else if (key === 'p') pdfBtn.click();
+  else if (key === 'c') copyBtn.click();
 });
 
-function filenameFor(meta) {
+async function withBusy(work, failMessage) {
+  if (!capture || busy) return;
+  busy = true;
+  for (const button of actionButtons) button.disabled = true;
+  try {
+    await work();
+  } catch {
+    toast(failMessage);
+  } finally {
+    busy = false;
+    for (const button of actionButtons) button.disabled = false;
+  }
+}
+
+function saveBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 10_000);
+}
+
+function filenameFor(meta, ext) {
   const host = formatHost(meta?.url).replace(/\./g, '-') || 'page';
   const title = slug(meta?.title || '').slice(0, 40);
   const when = new Date(meta?.capturedAt || Date.now()).toISOString().slice(0, 10);
-  return ['pageshot', title || host, when].filter(Boolean).join('-') + '.png';
+  return ['zen-page-shot', title || host, when].filter(Boolean).join('-') + `.${ext}`;
 }
 
 function formatHost(url) {

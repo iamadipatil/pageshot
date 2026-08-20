@@ -103,7 +103,7 @@ h1 {
 }
 
 .shot {
-  width: min(920px, 86vw);
+  width: min(960px, 88vw);
 }
 
 .frame {
@@ -112,7 +112,7 @@ h1 {
   border-radius: 22px;
   box-shadow: var(--shadow);
   overflow: auto;
-  max-height: min(72vh, 980px);
+  max-height: min(74vh, 1040px);
 }
 
 .frame img {
@@ -123,7 +123,7 @@ h1 {
 }
 
 .dock {
-  width: min(920px, 86vw);
+  width: min(960px, 88vw);
   margin: 8px auto 0;
   display: flex;
   align-items: center;
@@ -154,8 +154,10 @@ h1 {
 .actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: flex-end;
+  gap: 8px;
   flex-shrink: 0;
+  flex-wrap: wrap;
 }
 
 button {
@@ -171,6 +173,11 @@ button {
 
 button:active {
   transform: translateY(1px);
+}
+
+button:disabled {
+  opacity: 0.45;
+  cursor: wait;
 }
 
 .primary {
