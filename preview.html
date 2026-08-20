@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PageShot</title>
+    <link rel="stylesheet" href="preview.css" />
+    <link rel="icon" href="icons/icon32.png" />
+  </head>
+  <body>
+    <div class="stage">
+      <header class="top">
+        <div class="brand">
+          <img class="mark" src="icons/icon32.png" alt="" width="28" height="28" />
+          <span>PageShot</span>
+        </div>
+        <p class="aside" id="aside">Stays on this device</p>
+      </header>
+
+      <main class="main" id="main">
+        <section class="state" id="empty" hidden>
+          <p class="eyebrow">Ready when you are</p>
+          <h1>Capture any page in one click</h1>
+          <p class="lede">
+            Click the PageShot icon in the toolbar. The full page is stitched here as a PNG —
+            nothing is uploaded.
+          </p>
+        </section>
+
+        <section class="state" id="error" hidden>
+          <p class="eyebrow">Couldn’t capture</p>
+          <h1 id="error-title">This page can’t be captured</h1>
+          <p class="lede" id="error-detail">
+            Chrome blocks screenshots of its own pages and the Web Store. Open a regular website and
+            try again.
+          </p>
+        </section>
+
+        <section class="shot" id="shot" hidden>
+          <div class="frame" id="frame">
+            <img id="image" alt="Full-page capture" />
+          </div>
+        </section>
+      </main>
+
+      <footer class="dock" id="dock" hidden>
+        <div class="meta">
+          <p class="title" id="page-title"></p>
+          <p class="sub" id="page-sub"></p>
+        </div>
+        <div class="actions">
+          <button type="button" class="ghost" id="copy">Copy</button>
+          <button type="button" class="primary" id="download">Download PNG</button>
+        </div>
+      </footer>
+    </div>
+
+    <div class="toast" id="toast" hidden></div>
+    <script type="module" src="preview.js"></script>
+  </body>
+</html>
