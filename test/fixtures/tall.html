@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Zen Page Shot stitch fixture</title>
+    <style>
+      :root { color-scheme: light; }
+      body { margin: 0; font: 18px/1.5 ui-sans-serif, system-ui, sans-serif; }
+      header {
+        position: sticky;
+        top: 0;
+        background: #e87a40;
+        color: #fff;
+        padding: 16px 24px;
+        z-index: 4;
+      }
+      section {
+        height: 900px;
+        padding: 48px 32px;
+        box-sizing: border-box;
+      }
+      #a { background: #f3efe6; }
+      #b { background: #d7e8df; }
+      #c { background: #d9e0ef; }
+      img { display: block; width: 240px; height: 160px; background: #bbb; }
+    </style>
+  </head>
+  <body>
+    <header>Sticky header — should appear once</header>
+    <section id="a"><h1>Band A</h1><p>Top of a tall page.</p></section>
+    <section id="b"><h1>Band B</h1><p>Middle band for stitch seams.</p><img alt="lazy stand-in" /></section>
+    <section id="c"><h1>Band C</h1><p>Bottom band.</p></section>
+  </body>
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Zen Page Shot export test</title>
+  </head>
+  <body>
+    <pre id="out">running…</pre>
+    <script type="module">
+      import { blobToJpeg, captureToPdf, JPEG_QUALITY, MAX_PDF_POINT, pdfPageSize } from '../export.js';
+
+      const out = document.getElementById('out');
+      const errors = [];
+      const assert = (cond, message) => {
+        if (!cond) errors.push(message);
+      };
+
+      try {
+      const canvas = document.createElement('canvas');
+      canvas.width = 640;
+      canvas.height = 7200;
+      const ctx = canvas.getContext('2d', { alpha: false });
+      for (let y = 0; y < canvas.height; y += 400) {
+        ctx.fillStyle = y % 800 === 0 ? '#f3efe6' : '#d7e8df';
+        ctx.fillRect(0, y, canvas.width, 400);
+        ctx.fillStyle = '#161513';
+        ctx.font = '28px ui-sans-serif, system-ui';
+        ctx.fillText(`Band ${y / 400 + 1}`, 24, y + 48);
+      }
+
+      const png = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+      const jpeg = await blobToJpeg(png, JPEG_QUALITY);
+      const pdf = await captureToPdf(png, { width: canvas.width, height: canvas.height });
+      const pdfBytes = new Uint8Array(await pdf.arrayBuffer());
+      const pdfHead = new TextDecoder('latin1').decode(pdfBytes.slice(0, 800));
+      const pdfTail = new TextDecoder('latin1').decode(pdfBytes.slice(-1200));
+      const size = pdfPageSize(canvas.width, canvas.height);
+
+      assert(jpeg.type === 'image/jpeg', 'jpeg type');
+      assert(jpeg.size > 8000, `jpeg too small: ${jpeg.size}`);
+      assert(pdf.type === 'application/pdf', 'pdf type');
+      assert(pdfBytes[0] === 0x25 && pdfBytes[1] === 0x50, 'pdf header');
+      assert(pdfHead.includes('/Type /Catalog'), 'catalog');
+      assert(pdfTail.includes('Zen Page Shot'), 'producer');
+      assert(pdfTail.includes('%%EOF'), 'eof');
+      assert(size.singlePage === true, 'tall fixture should be one page');
+      assert(size.heightPt <= MAX_PDF_POINT, 'media box overflow');
+      assert(pdf.size > jpeg.size * 0.5, `pdf implausibly small: ${pdf.size}`);
+
+      out.textContent = errors.length ? `FAIL\n${errors.join('\n')}` : 'PASS';
+      document.title = errors.length ? 'FAIL' : 'PASS';
+      } catch (error) {
+        out.textContent = 'FAIL\n' + (error && error.stack ? error.stack : String(error));
+        document.title = 'FAIL';
+      }
+    </script>
+  </body>
+</html>

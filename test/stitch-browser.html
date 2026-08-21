@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Zen Page Shot stitch test</title>
+  </head>
+  <body>
+    <pre id="out">running…</pre>
+    <script type="module">
+      import { deviceRect, planSlices } from '../plan.js';
+
+      const out = document.getElementById('out');
+      const errors = [];
+
+      function assert(cond, message) {
+        if (!cond) errors.push(message);
+      }
+
+      const metrics = {
+        pageWidth: 200,
+        pageHeight: 500,
+        viewportWidth: 200,
+        viewportHeight: 200,
+      };
+      const slices = planSlices(metrics);
+      assert(slices.length === 3, `expected 3 slices, got ${slices.length}`);
+
+      const canvas = document.createElement('canvas');
+      canvas.width = 200;
+      canvas.height = 500;
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+      const colors = [
+        [255, 0, 0],
+        [0, 255, 0],
+        [0, 0, 255],
+      ];
+
+      slices.forEach((slice, index) => {
+        const view = document.createElement('canvas');
+        view.width = 200;
+        view.height = 200;
+        const vctx = view.getContext('2d');
+        vctx.fillStyle = `rgb(${colors[index].join(',')})`;
+        vctx.fillRect(0, 0, 200, 200);
+        const rect = deviceRect(slice, 0, 0, 1, 1);
+        ctx.drawImage(view, rect.sx, rect.sy, rect.sw, rect.sh, rect.dx, rect.dy, rect.dw, rect.dh);
+      });
+
+      function sample(x, y) {
+        const [r, g, b] = ctx.getImageData(x, y, 1, 1).data;
+        return [r, g, b];
+      }
+
+      assert(sample(10, 10).join(',') === '255,0,0', 'top should be red');
+      assert(sample(10, 210).join(',') === '0,255,0', 'middle should be green');
+      assert(sample(10, 480).join(',') === '0,0,255', 'bottom remainder should be blue');
+
+      if (errors.length) {
+        out.textContent = 'FAIL\n' + errors.join('\n');
+        document.title = 'FAIL';
+      } else {
+        out.textContent = 'PASS';
+        document.title = 'PASS';
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Seeding preview</title>
+  </head>
+  <body>
+    <p>seeding…</p>
+    <script type="module">
+      import { putLatestCapture } from '../db.js';
+
+      const canvas = document.createElement('canvas');
+      canvas.width = 900;
+      canvas.height = 2200;
+      const ctx = canvas.getContext('2d');
+      const bands = ['#f3efe6', '#ead7c4', '#d7e8df', '#d9e0ef'];
+      bands.forEach((color, i) => {
+        ctx.fillStyle = color;
+        ctx.fillRect(0, i * 550, 900, 550);
+        ctx.fillStyle = '#161513';
+        ctx.font = '600 42px ui-sans-serif, system-ui, sans-serif';
+        ctx.fillText(`Section ${i + 1}`, 48, i * 550 + 96);
+        ctx.font = '22px ui-sans-serif, system-ui, sans-serif';
+        ctx.fillStyle = '#6d6a63';
+        ctx.fillText('Local full-page preview — nothing uploaded.', 48, i * 550 + 148);
+      });
+
+      const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+      await putLatestCapture({
+        blob,
+        meta: {
+          title: 'Autumn field notes',
+          url: 'https://notes.example.com/autumn',
+          width: canvas.width,
+          height: canvas.height,
+          capturedAt: Date.now(),
+        },
+      });
+      location.replace('../preview.html');
+    </script>
+  </body>
+</html>
